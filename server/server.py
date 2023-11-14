@@ -57,7 +57,7 @@ def hello():
 def create_link_token():
     link_token_request = LinkTokenCreateRequest(
         products=[Products("auth"), Products("transactions")],
-        client_name="Plaid EvaDB",
+        client_name="Banking_Proto",
         country_codes=[CountryCode('US')],
         language='en',
         user=LinkTokenCreateRequestUser(
