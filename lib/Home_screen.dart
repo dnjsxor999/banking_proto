@@ -24,6 +24,8 @@ class ConnectButton extends StatelessWidget {
         const snackBar = SnackBar(content: Text('Tap'));
 
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        // get token
+        // and move to analysis page
       },
       // The custom button
       child: Padding(
@@ -35,19 +37,19 @@ class ConnectButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const TextField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter your bank account',
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
+            // const TextField(
+            //   decoration: InputDecoration(
+            //     border: OutlineInputBorder(),
+            //     hintText: 'Enter your bank account',
+            //   ),
+            // ),
+            // const SizedBox(
+            //   height: 20,
+            // ),
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.white10,
                 borderRadius: BorderRadius.circular(3),
                 border: Border.all(),
               ),
