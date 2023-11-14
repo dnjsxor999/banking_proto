@@ -65,6 +65,9 @@ def create_link_token():
         )
     )
     response = client.link_token_create(link_token_request)
+    print("create_link_token complete")
+    print("return")
+    print(jsonify(response.to_dict()))
     return jsonify(response.to_dict())
 
 @app.route('/set_access_token', methods=['POST'])
@@ -79,6 +82,9 @@ def set_access_token():
         response = client.item_public_token_exchange(public_token_exchange_request)
         access_token = response['access_token']
         item_id = response['item_id']
+        print("set_access_token complete")
+        print("return")
+        print(jsonify(response.to_dict()))
         return jsonify(response.to_dict())
     except plaid.ApiException as e:
         return json.loads(e.body)
@@ -106,6 +112,9 @@ def get_transactions():
     response = client.transactions_get(request)
     transactions.extend(response['transactions'])
     
+    print("get_transactions complete")
+    print("return")
+    print(jsonify(response.to_dict()))
     return jsonify(response.to_dict())  
 
 if __name__ == '__main__':
