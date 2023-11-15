@@ -36,7 +36,7 @@ PLAID_SANDBOX = os.getenv('PLAID_SANDBOX')
 access_token = None
 item_id = None
 # unique client id, but I am manually setting for the time being
-client_user_id = '12345'
+client_user_id = 'user_good'
 
 host = plaid.Environment.Sandbox
 configuration = plaid.Configuration(

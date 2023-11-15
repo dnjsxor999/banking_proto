@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../service.dart';
+import 'package:plaid_flutter/plaid_flutter.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,12 +23,21 @@ class ConnectButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        const snackBar = SnackBar(content: Text('Tap'));
+      onTap: () async {
+        try {
+          final linkToken = await PlaidService.getLinkToken(http.Client());
+          print('linkToken generated');
+          print(linkToken);
+          LinkConfiguration configuration =
+              LinkTokenConfiguration(token: linkToken);
 
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        // get token
-        // and move to analysis page
+          PlaidLink.open(configuration: configuration);
+        } catch (e) {
+          print(e);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to connect to bank account')),
+          );
+        }
       },
       // The custom button
       child: Padding(

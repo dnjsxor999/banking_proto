@@ -12,27 +12,31 @@ import 'package:http/http.dart' as http;
 // }
 
 class PlaidService {
-  static String linkToken = '';
-  static String accessToken = '';
-
-  static Future<void> getLinkToken(http.Client client) async {
-    final response = await client
-        .get(Uri.parse('https://localhost://8000/create_link_token'));
+  static Future<String> getLinkToken(http.Client client) async {
+    final response = await client.post(
+      Uri.parse('http://127.0.0.1:8000/create_link_token'),
+      headers: {"Content-Type": "application/json"},
+    );
 
     if (response.statusCode == 200) {
-      linkToken = jsonDecode(response.body)['link_token'];
+      return jsonDecode(response.body)['link_token'];
     } else {
-      throw Error();
+      throw Exception('Failed to get link token');
     }
   }
 
-  static Future<void> setAccessToken(http.Client client) async {
-    final response = await client
-        .get(Uri.parse("https://localhost://8000/set_access_token"));
+  static Future<String> setAccessToken(
+      http.Client client, String publicToken) async {
+    final response = await client.post(
+      Uri.parse("http://127.0.0.1:8000/set_access_token"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({'public_token': publicToken}),
+    );
+
     if (response.statusCode == 200) {
-      accessToken = jsonDecode(response.body)['access_token'];
+      return jsonDecode(response.body)['access_token'];
     } else {
-      throw Error();
+      throw Exception('Failed to set access token');
     }
   }
 }
