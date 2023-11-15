@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../service.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
+import 'dart:async';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,8 +18,40 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class ConnectButton extends StatelessWidget {
+class ConnectButton extends StatefulWidget {
   const ConnectButton({super.key});
+
+  @override
+  _ConnectButtonState createState() => _ConnectButtonState();
+}
+
+class _ConnectButtonState extends State<ConnectButton> {
+  StreamSubscription<LinkSuccess>? _streamSuccess;
+
+  @override
+  void initState() {
+    super.initState();
+    // Setting up the onSuccess listener
+    _streamSuccess = PlaidLink.onSuccess.listen(_onSuccess);
+  }
+
+  @override
+  void dispose() {
+    _streamSuccess?.cancel();
+    super.dispose();
+  }
+
+  void _onSuccess(LinkSuccess event) {
+    final publicToken = event.publicToken;
+    print("Received public token: $publicToken");
+    // Exchange public token for access token
+    PlaidService.setAccessToken(http.Client(), publicToken).then((accessToken) {
+      print('Access Token: $accessToken');
+      // Handle the access token as needed
+    }).catchError((e) {
+      print('Error exchanging public token: $e');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +72,6 @@ class ConnectButton extends StatelessWidget {
           );
         }
       },
-      // The custom button
       child: Padding(
         padding: const EdgeInsets.symmetric(
           vertical: 10,
