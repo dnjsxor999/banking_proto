@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import '../service.dart';
+import 'package:plaid_flutter/plaid_flutter.dart';
+import 'dart:async';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -6,7 +10,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Colors.grey,
+      backgroundColor: Colors.white,
       body: Center(
         child: ConnectButton(),
       ),
@@ -14,41 +18,92 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class ConnectButton extends StatelessWidget {
+class ConnectButton extends StatefulWidget {
   const ConnectButton({super.key});
+
+  @override
+  _ConnectButtonState createState() => _ConnectButtonState();
+}
+
+class _ConnectButtonState extends State<ConnectButton> {
+  StreamSubscription<LinkSuccess>? _streamSuccess;
+
+  @override
+  void initState() {
+    super.initState();
+    // Setting up the onSuccess listener
+    _streamSuccess = PlaidLink.onSuccess.listen(_onSuccess);
+  }
+
+  @override
+  void dispose() {
+    _streamSuccess?.cancel();
+    super.dispose();
+  }
+
+  void _onSuccess(LinkSuccess event) {
+    final publicToken = event.publicToken;
+    print("Received public token: $publicToken");
+    // Exchange public token for access token
+    PlaidService.setAccessToken(http.Client(), publicToken).then((accessToken) {
+      print('Access Token: $accessToken');
+      // Handle the access token as needed
+    }).catchError((e) {
+      print('Error exchanging public token: $e');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        const snackBar = SnackBar(content: Text('Tap'));
+      onTap: () async {
+        try {
+          final linkToken = await PlaidService.getLinkToken(http.Client());
+          print('linkToken generated');
+          print(linkToken);
+          LinkConfiguration configuration =
+              LinkTokenConfiguration(token: linkToken);
 
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          PlaidLink.open(configuration: configuration);
+        } catch (e) {
+          print(e);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to connect to bank account')),
+          );
+        }
       },
-      // The custom button
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const TextField(
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Enter your bank account',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 20,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // const TextField(
+            //   decoration: InputDecoration(
+            //     border: OutlineInputBorder(),
+            //     hintText: 'Enter your bank account',
+            //   ),
+            // ),
+            // const SizedBox(
+            //   height: 20,
+            // ),
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white10,
+                borderRadius: BorderRadius.circular(3),
+                border: Border.all(),
+              ),
+              child: const Text('Connect bank accounts',
+                  style: TextStyle(
+                    fontSize: 18,
+                  )),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(3),
-              border: Border.all(),
-            ),
-            child: const Text('Connect bank accounts'),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

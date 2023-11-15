@@ -26,8 +26,8 @@ from plaid.model.transactions_get_request import TransactionsGetRequest
 from plaid.model.transactions_get_request_options import TransactionsGetRequestOptions
 
 app = Flask(__name__)
-# CORS(app, origins='http://localhost:3000')
-CORS(app, supports_credentials=True)
+CORS(app, origins='http://localhost:3000')
+# CORS(app, supports_credentials=True)
 load_dotenv()
 
 PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
