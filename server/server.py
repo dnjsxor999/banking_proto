@@ -32,6 +32,7 @@ load_dotenv()
 
 PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
 PLAID_SANDBOX = os.getenv('PLAID_SANDBOX')
+PLAID_DEVELOPMENT = os.getenv('PLAID_DEVELOPMENT')
 
 access_token = None
 item_id = None

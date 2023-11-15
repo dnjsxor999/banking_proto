@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import '../models/transaction.dart';
 import 'package:http/http.dart' as http;
 
 // class PlaidModel {
@@ -37,6 +37,23 @@ class PlaidService {
       return jsonDecode(response.body)['access_token'];
     } else {
       throw Exception('Failed to set access token');
+    }
+  }
+
+  static Future<List<Transaction>> getTransactions(http.Client client) async {
+    final response = await client.get(
+      Uri.parse("http://127.0.0.1:8000/get_transactions"),
+      headers: {"Content-Type": "application/json"},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final transactions = data['transactions']
+          .map<Transaction>((json) => Transaction.fromJson(json))
+          .toList();
+      return transactions;
+    } else {
+      throw Exception('Failed to get transactions');
     }
   }
 }
