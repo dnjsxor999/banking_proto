@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../service.dart';
 import 'package:plaid_flutter/plaid_flutter.dart';
 import 'dart:async';
+import '../models/transaction.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -27,11 +28,11 @@ class ConnectButton extends StatefulWidget {
 
 class _ConnectButtonState extends State<ConnectButton> {
   StreamSubscription<LinkSuccess>? _streamSuccess;
+  List<Transaction> transactions = [];
 
   @override
   void initState() {
     super.initState();
-    // Setting up the onSuccess listener
     _streamSuccess = PlaidLink.onSuccess.listen(_onSuccess);
   }
 
@@ -48,6 +49,12 @@ class _ConnectButtonState extends State<ConnectButton> {
     PlaidService.setAccessToken(http.Client(), publicToken).then((accessToken) {
       print('Access Token: $accessToken');
       // Handle the access token as needed
+      PlaidService.getTransactions(http.Client()).then((fetchedTransactions) {
+        setState(() {
+          transactions = fetchedTransactions;
+        });
+        print(transactions);
+      });
     }).catchError((e) {
       print('Error exchanging public token: $e');
     });
@@ -81,15 +88,6 @@ class _ConnectButtonState extends State<ConnectButton> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // const TextField(
-            //   decoration: InputDecoration(
-            //     border: OutlineInputBorder(),
-            //     hintText: 'Enter your bank account',
-            //   ),
-            // ),
-            // const SizedBox(
-            //   height: 20,
-            // ),
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -102,6 +100,19 @@ class _ConnectButtonState extends State<ConnectButton> {
                     fontSize: 18,
                   )),
             ),
+            // Expanded(
+            //   child: ListView.builder(
+            //     itemCount: transactions.length,
+            //     itemBuilder: (context, index) {
+            //       final transaction = transactions[index];
+            //       return ListTile(
+            //         title: Text(transaction.name),
+            //         subtitle: Text(
+            //             '${transaction.date} - \$${transaction.amount.toString()}'),
+            //       );
+            //     },
+            //   ),
+            // ),
           ],
         ),
       ),
