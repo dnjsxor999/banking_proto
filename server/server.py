@@ -40,11 +40,13 @@ item_id = None
 client_user_id = 'user_good'
 
 host = plaid.Environment.Sandbox
+# host = plaid.Environment.Development
 configuration = plaid.Configuration(
     host=host,
     api_key={
         'clientId': PLAID_CLIENT_ID,
         'secret': PLAID_SANDBOX,
+        # 'secret': PLAID_DEVELOPMENT,
     }
 )
 api_client = plaid.ApiClient(configuration)
