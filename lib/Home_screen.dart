@@ -1,9 +1,10 @@
+import 'package:draft_ui/PlaidLink.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../service.dart';
-import 'package:plaid_flutter/plaid_flutter.dart';
-import 'dart:async';
-import '../models/transaction.dart';
+// import 'package:plaid_flutter/plaid_flutter.dart';
+// import 'dart:async';
+// import '../models/transaction.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -19,66 +20,39 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class ConnectButton extends StatefulWidget {
+class ConnectButton extends StatelessWidget {
   const ConnectButton({super.key});
 
-  @override
-  _ConnectButtonState createState() => _ConnectButtonState();
-}
-
-class _ConnectButtonState extends State<ConnectButton> {
-  StreamSubscription<LinkSuccess>? _streamSuccess;
-  List<Transaction> transactions = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _streamSuccess = PlaidLink.onSuccess.listen(_onSuccess);
+  Future<void> _handleOnTap(BuildContext context) async {
+    try {
+      final linkToken = await PlaidService.getLinkToken(http.Client());
+      print('linkToken generated');
+      print(linkToken);
+      _navigateToPlaid(context, linkToken);
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to connect to bank account')),
+      );
+    }
   }
 
-  @override
-  void dispose() {
-    _streamSuccess?.cancel();
-    super.dispose();
-  }
-
-  void _onSuccess(LinkSuccess event) {
-    final publicToken = event.publicToken;
-    print("Received public token: $publicToken");
-    // Exchange public token for access token
-    PlaidService.setAccessToken(http.Client(), publicToken).then((accessToken) {
-      print('Access Token: $accessToken');
-      // Handle the access token as needed
-      PlaidService.getTransactions(http.Client()).then((fetchedTransactions) {
-        setState(() {
-          transactions = fetchedTransactions;
-        });
-        print(transactions);
-      });
-    }).catchError((e) {
-      print('Error exchanging public token: $e');
-    });
+  void _navigateToPlaid(BuildContext context, String linkToken) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => LinkToPlaid(
+          linkToken: linkToken,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
-        try {
-          final linkToken = await PlaidService.getLinkToken(http.Client());
-          print('linkToken generated');
-          print(linkToken);
-          LinkConfiguration configuration =
-              LinkTokenConfiguration(token: linkToken);
-
-          PlaidLink.open(configuration: configuration);
-        } catch (e) {
-          print(e);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to connect to bank account')),
-          );
-        }
-      },
+      onTap: () => _handleOnTap(context),
       child: Padding(
         padding: const EdgeInsets.symmetric(
           vertical: 10,
@@ -100,22 +74,16 @@ class _ConnectButtonState extends State<ConnectButton> {
                     fontSize: 18,
                   )),
             ),
-            // Expanded(
-            //   child: ListView.builder(
-            //     itemCount: transactions.length,
-            //     itemBuilder: (context, index) {
-            //       final transaction = transactions[index];
-            //       return ListTile(
-            //         title: Text(transaction.name),
-            //         subtitle: Text(
-            //             '${transaction.date} - \$${transaction.amount.toString()}'),
-            //       );
-            //     },
-            //   ),
-            // ),
           ],
         ),
       ),
     );
   }
 }
+
+  // @override
+  // State<StatefulWidget> createState() {
+  //   // TODO: implement createState
+  //   throw UnimplementedError();
+  // }
+// }
